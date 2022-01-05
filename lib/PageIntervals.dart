@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'package:codelab_timetraker/page_activities.dart';
+import 'package:time_tracker/page_activities.dart';
 import 'package:flutter/material.dart';
-import 'package:codelab_timetraker/tree.dart' as Tree hide getTree;
-import 'package:codelab_timetraker/requests.dart';
+import 'package:time_tracker/tree.dart' as Tree hide getTree;
+import 'package:time_tracker/requests.dart';
 import 'dart:async';
+
 class PageIntervals extends StatefulWidget {
   final int id; // final because StatefulWidget is immutable
 
@@ -24,6 +25,7 @@ class _PageIntervalsState extends State<PageIntervals> {
       setState(() {});
     });
   }
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +33,7 @@ class _PageIntervalsState extends State<PageIntervals> {
     futureTree = getTree(id);
     _activateTimer();
   }
+
   @override
   void dispose() {
     // "The framework calls this method when this State object will never build again"
@@ -55,9 +58,10 @@ class _PageIntervalsState extends State<PageIntervals> {
             appBar: AppBar(
               title: Text(snapshot.data!.root.name),
               actions: <Widget>[
-                IconButton(icon: Icon(Icons.home),
+                IconButton(
+                    icon: Icon(Icons.home),
                     onPressed: () {
-                      while(Navigator.of(context).canPop()) {
+                      while (Navigator.of(context).canPop()) {
                         print("pop");
                         Navigator.of(context).pop();
                       }
@@ -75,7 +79,7 @@ class _PageIntervalsState extends State<PageIntervals> {
               itemBuilder: (BuildContext context, int index) =>
                   _buildRow(snapshot.data!.root.children[index], index),
               separatorBuilder: (BuildContext context, int index) =>
-              const Divider(),
+                  const Divider(),
             ),
             floatingActionButton: FloatingActionButton(
               child: active ? Icon(Icons.pause) : Icon(Icons.play_arrow),
