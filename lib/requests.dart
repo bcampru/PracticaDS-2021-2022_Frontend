@@ -61,3 +61,23 @@ Future<void> stop(int id) async {
     throw Exception('Failed to get children');
   }
 }
+Future<void> createProject(String name, String tag,int id,int tagged) async {
+  var uri = Uri.parse("$baseUrl/createProject?$name?$tag?$id?$tagged");
+  final response = await client.get(uri);
+  if (response.statusCode == 200) {
+    print("statusCode=$response.statusCode");
+  } else {
+    print("statusCode=$response.statusCode");
+    throw Exception('Failed to get children');
+  }
+}
+Future<void> createTask(String name, String tag,int id,int tagged) async {
+  var uri = Uri.parse("$baseUrl/createTask?$name?$tag?$id?$tagged");
+  final response = await client.get(uri);
+  if (response.statusCode == 200) {
+    print("statusCode=$response.statusCode");
+  } else {
+    print("statusCode=$response.statusCode");
+    throw Exception('Failed to get children');
+  }
+}
