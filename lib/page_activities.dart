@@ -1,8 +1,9 @@
-import 'package:time_tracker/tree.dart' hide getTree;
+import 'package:codelab_timetraker/tree.dart' hide getTree;
 import 'package:flutter/material.dart';
-import 'package:time_tracker/PageIntervals.dart';
-import 'package:time_tracker/requests.dart';
-
+import 'package:codelab_timetraker/PageIntervals.dart';
+import 'package:codelab_timetraker/requests.dart';
+import 'dart:async';
+import 'package:codelab_timetraker/form.dart';
 class PageActivities extends StatefulWidget {
   final int id;
   @override
@@ -13,12 +14,63 @@ class PageActivities extends StatefulWidget {
 class _PageActivitiesState extends State<PageActivities> {
   late int id;
   late Future<Tree> futureTree;
-
+  late Timer _timer;
+  static const int periodeRefresh = 1;
+  void _refresh() async {
+    futureTree = getTree(id); // to be used in build()
+    setState(() {});
+  }
+  void _activateTimer() {
+    _timer = Timer.periodic(Duration(seconds: periodeRefresh), (Timer t) {
+      futureTree = getTree(id);
+      setState(() {});
+    });
+  }
+  void _doForm(int id){
+    _timer.cancel();
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(
+      builder: (context) => MyCustomForm(id),
+    )).then((var value) {
+      _activateTimer();
+      _refresh();
+    });
+  }
+  void _navigateDownIntervals(int childId) {
+    _timer.cancel();
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(
+      builder: (context) => PageIntervals(childId),
+    )).then((var value) {
+      _activateTimer();
+      _refresh();
+    });
+  }
+  @override
+  void dispose() {
+    // "The framework calls this method when this State object will never build again"
+    // therefore when going up
+    _timer.cancel();
+    super.dispose();
+  }
+  void _navigateDownActivities(int childId) {
+    _timer.cancel();
+    // we can not do just _refresh() because then the up arrow doesn't appear in the appbar
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(
+      builder: (context) => PageActivities(childId),
+    )).then((var value) {
+      _activateTimer();
+      _refresh();
+    });
+    //https://stackoverflow.com/questions/49830553/how-to-go-back-and-refresh-the-previous-page-in-flutter?noredirect=1&lq=1
+  }
   @override
   void initState() {
     super.initState();
-    id = widget.id; // of PageActivities
+    id = widget.id;
     futureTree = getTree(id);
+    _activateTimer();
   }
 
   @override
@@ -33,14 +85,21 @@ class _PageActivitiesState extends State<PageActivities> {
             appBar: AppBar(
               title: Text(snapshot.data!.root.name),
               actions: <Widget>[
-                IconButton(
-                    icon: Icon(Icons.home),
-                    onPressed: () {} // TODO go home page = root
-                    ),
+                IconButton(icon: Icon(Icons.home),
+                    onPressed: () {
+                      while(Navigator.of(context).canPop()) {
+                        print("pop");
+                        Navigator.of(context).pop();
+                      }
+                      /* this works also:
+    Navigator.popUntil(context, ModalRoute.withName('/'));
+  */
+                      PageActivities(0);
+                    }),
                 IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () {} // TODO search by tag
-                    ),
+                ),
                 //TODO other actions
               ],
             ),
@@ -51,15 +110,15 @@ class _PageActivitiesState extends State<PageActivities> {
               itemBuilder: (BuildContext context, int index) =>
                   _buildRow(snapshot.data!.root.children[index], index),
               separatorBuilder: (BuildContext context, int index) =>
-                  const Divider(),
+              const Divider(),
             ),
             floatingActionButton: FloatingActionButton(
                 child: Icon(Icons.add),
                 backgroundColor: Colors.grey,
                 foregroundColor: Colors.white,
-                onPressed: () => {}
-                //TODO ADD task or project
-                ),
+                onPressed: () =>_doForm(snapshot.data!.root.id)
+              //TODO ADD task or project
+            ),
           );
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
@@ -74,19 +133,6 @@ class _PageActivitiesState extends State<PageActivities> {
       },
     );
   }
-
-  void _navigateDownActivities(int childId) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (context) => PageActivities(childId),
-    ));
-  }
-
-  void _navigateDownIntervals(int childId) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (context) => PageIntervals(childId),
-    ));
-  }
-
   Widget _buildRow(Activity activity, int index) {
     String strDuration =
         Duration(seconds: activity.duration).toString().split('.').first;
@@ -130,7 +176,15 @@ class _PageActivitiesState extends State<PageActivities> {
 
         trailing: trailing,
         onTap: () => _navigateDownIntervals(activity.id),
-        onLongPress: () {}, // TODO start/stop counting the time for tis task
+        onLongPress: () {
+          if ((activity as Task).active) {
+            stop(activity.id);
+            _refresh(); // to show immediately that task has started
+          } else {
+            start(activity.id);
+            _refresh(); // to show immediately that task has stopped
+          }
+        },
       );
     } else {
       throw (Exception("Activity that is neither a Task or a Project"));
