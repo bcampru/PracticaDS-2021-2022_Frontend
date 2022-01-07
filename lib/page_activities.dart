@@ -1,16 +1,15 @@
-import 'package:time_tracker/tree.dart' hide getTree;
+import 'package:codelab_timetraker/tree.dart' hide getTree;
 import 'package:flutter/material.dart';
-import 'package:time_tracker/PageIntervals.dart';
-import 'package:time_tracker/requests.dart';
+import 'package:codelab_timetraker/PageIntervals.dart';
+import 'package:codelab_timetraker/requests.dart';
 import 'dart:async';
-import 'package:time_tracker/form.dart';
-import 'package:time_tracker/edit.dart';
-
+import 'package:codelab_timetraker/form.dart';
 class PageActivities extends StatefulWidget {
   final int id;
   @override
   _PageActivitiesState createState() => _PageActivitiesState();
   PageActivities(this.id);
+
 }
 
 class _PageActivitiesState extends State<PageActivities> {
@@ -22,50 +21,32 @@ class _PageActivitiesState extends State<PageActivities> {
     futureTree = getTree(id); // to be used in build()
     setState(() {});
   }
-
   void _activateTimer() {
     _timer = Timer.periodic(Duration(seconds: periodeRefresh), (Timer t) {
       futureTree = getTree(id);
       setState(() {});
     });
   }
-
-  void _doForm(int id) {
+  void _doForm(int id){
     _timer.cancel();
     Navigator.of(context)
         .push(MaterialPageRoute<void>(
       builder: (context) => MyCustomForm(id),
-    ))
-        .then((var value) {
+    )).then((var value) {
       _activateTimer();
       _refresh();
     });
   }
-
-  void _doEdit(Activity act) {
-    _timer.cancel();
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(
-      builder: (context) => MyCustomEdit(act),
-    ))
-        .then((var value) {
-      _activateTimer();
-      _refresh();
-    });
-  }
-
   void _navigateDownIntervals(int childId) {
     _timer.cancel();
     Navigator.of(context)
         .push(MaterialPageRoute<void>(
       builder: (context) => PageIntervals(childId),
-    ))
-        .then((var value) {
+    )).then((var value) {
       _activateTimer();
       _refresh();
     });
   }
-
   @override
   void dispose() {
     // "The framework calls this method when this State object will never build again"
@@ -73,21 +54,18 @@ class _PageActivitiesState extends State<PageActivities> {
     _timer.cancel();
     super.dispose();
   }
-
   void _navigateDownActivities(int childId) {
     _timer.cancel();
     // we can not do just _refresh() because then the up arrow doesn't appear in the appbar
     Navigator.of(context)
         .push(MaterialPageRoute<void>(
       builder: (context) => PageActivities(childId),
-    ))
-        .then((var value) {
+    )).then((var value) {
       _activateTimer();
       _refresh();
     });
     //https://stackoverflow.com/questions/49830553/how-to-go-back-and-refresh-the-previous-page-in-flutter?noredirect=1&lq=1
   }
-
   @override
   void initState() {
     super.initState();
@@ -108,18 +86,9 @@ class _PageActivitiesState extends State<PageActivities> {
             appBar: AppBar(
               title: Text(snapshot.data!.root.name),
               actions: <Widget>[
-                snapshot.data!.root.id != 0
-                    ? IconButton(
-                        icon: Icon(Icons.build),
-                        onPressed: () {
-                          _doEdit(snapshot.data!.root);
-                        })
-                    : new Container(),
-                //idact=snapshot.data!.root.id;dd
-                IconButton(
-                    icon: Icon(Icons.home),
+                IconButton(icon: Icon(Icons.home),
                     onPressed: () {
-                      while (Navigator.of(context).canPop()) {
+                      while(Navigator.of(context).canPop()) {
                         print("pop");
                         Navigator.of(context).pop();
                       }
@@ -131,7 +100,7 @@ class _PageActivitiesState extends State<PageActivities> {
                 IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () {} // TODO search by tag
-                    ),
+                ),
                 //TODO other actions
               ],
             ),
@@ -142,15 +111,15 @@ class _PageActivitiesState extends State<PageActivities> {
               itemBuilder: (BuildContext context, int index) =>
                   _buildRow(snapshot.data!.root.children[index], index),
               separatorBuilder: (BuildContext context, int index) =>
-                  const Divider(),
+              const Divider(),
             ),
             floatingActionButton: FloatingActionButton(
                 child: Icon(Icons.add),
                 backgroundColor: Colors.grey,
                 foregroundColor: Colors.white,
-                onPressed: () => _doForm(snapshot.data!.root.id)
-                //TODO ADD task or project
-                ),
+                onPressed: () =>_doForm(snapshot.data!.root.id)
+              //TODO ADD task or project
+            ),
           );
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
@@ -165,7 +134,6 @@ class _PageActivitiesState extends State<PageActivities> {
       },
     );
   }
-
   Widget _buildRow(Activity activity, int index) {
     String strDuration =
         Duration(seconds: activity.duration).toString().split('.').first;
@@ -183,7 +151,11 @@ class _PageActivitiesState extends State<PageActivities> {
               text: '${activity.name}',
               style: TextStyle(color: Colors.white, fontSize: 20.0),
             ),
-          ]),
+            TextSpan(
+              text :'\n Tags :',
+            ),
+          ]
+        ),
         ),
         onTap: () => _navigateDownActivities(activity.id),
       );
