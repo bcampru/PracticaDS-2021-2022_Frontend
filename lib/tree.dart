@@ -21,7 +21,7 @@ abstract class Activity {
   Activity.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],
-        tags = json['tags'],
+        tags = convert.jsonDecode(json['tags']),
         initialDate = json['initialDate'] == null
             ? null
             : _dateFormatter.parse(json['initialDate']),

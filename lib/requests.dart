@@ -61,7 +61,8 @@ Future<void> stop(int id) async {
     throw Exception('Failed to get children');
   }
 }
-Future<void> createProject(String name,int tagged,int id,String tag) async {
+
+Future<void> createProject(String name, int tagged, int id, String tag) async {
   var uri = Uri.parse("$baseUrl/createProject?$name?$tagged?$id?$tag");
   final response = await client.get(uri);
   if (response.statusCode == 200) {
@@ -71,11 +72,36 @@ Future<void> createProject(String name,int tagged,int id,String tag) async {
     throw Exception('Failed to get children');
   }
 }
-Future<void> createTask(String name, int tagged,int id,String tag) async {
+
+Future<void> createTask(String name, int tagged, int id, String tag) async {
   var uri = Uri.parse("$baseUrl/createTask?$name?$tagged?$id?$tag");
   final response = await client.get(uri);
   if (response.statusCode == 200) {
     print("statusCode=$response.statusCode");
+  } else {
+    print("statusCode=$response.statusCode");
+    throw Exception('Failed to get children');
+  }
+}
+
+Future<void> updateActivity(int id, String name, String tag) async {
+  var uri = Uri.parse("$baseUrl/update?$id?$name?$tag");
+  final response = await client.get(uri);
+  if (response.statusCode == 200) {
+    print("statusCode=$response.statusCode");
+  } else {
+    print("statusCode=$response.statusCode");
+    throw Exception('Failed to get children');
+  }
+}
+
+Future<Tree> search(String tag) async {
+  var uri = Uri.parse("$baseUrl/update?$tag");
+  final response = await client.get(uri);
+  if (response.statusCode == 200) {
+    print("statusCode=$response.statusCode");
+    Map<String, dynamic> decoded = convert.jsonDecode(response.body);
+    return Tree(decoded);
   } else {
     print("statusCode=$response.statusCode");
     throw Exception('Failed to get children');

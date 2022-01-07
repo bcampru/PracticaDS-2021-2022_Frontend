@@ -1,4 +1,4 @@
-import 'package:time_tracker/tree.dart' hide getTree;
+import 'package:time_tracker/tree.dart' hide search;
 import 'package:flutter/material.dart';
 import 'package:time_tracker/PageIntervals.dart';
 import 'package:time_tracker/requests.dart';
@@ -6,26 +6,26 @@ import 'dart:async';
 import 'package:time_tracker/form.dart';
 import 'package:time_tracker/edit.dart';
 
-class PageActivities extends StatefulWidget {
-  final int id;
+class PageSearch extends StatefulWidget {
+  final int tags;
   @override
-  _PageActivitiesState createState() => _PageActivitiesState();
-  PageActivities(this.id);
+  _PageSearchState createState() => _PageSearchState();
+  PageSearch(this.tags);
 }
 
-class _PageActivitiesState extends State<PageActivities> {
-  late int id;
+class _PageSearchState extends State<PageSearch> {
+  late String tags;
   late Future<Tree> futureTree;
   late Timer _timer;
   static const int periodeRefresh = 1;
   void _refresh() async {
-    futureTree = getTree(id); // to be used in build()
+    futureTree = search(tags); // to be used in build()
     setState(() {});
   }
 
   void _activateTimer() {
     _timer = Timer.periodic(Duration(seconds: periodeRefresh), (Timer t) {
-      futureTree = getTree(id);
+      futureTree = search(tags);
       setState(() {});
     });
   }
@@ -80,7 +80,7 @@ class _PageActivitiesState extends State<PageActivities> {
     // we can not do just _refresh() because then the up arrow doesn't appear in the appbar
     Navigator.of(context)
         .push(MaterialPageRoute<void>(
-      builder: (context) => PageActivities(childId),
+      builder: (context) => PageSearch(childId),
     ))
         .then((var value) {
       _activateTimer();
@@ -103,8 +103,8 @@ class _PageActivitiesState extends State<PageActivities> {
   @override
   void initState() {
     super.initState();
-    id = widget.id;
-    futureTree = getTree(id);
+    tags = "";
+    futureTree = search(tags);
     _activateTimer();
   }
 
@@ -133,7 +133,7 @@ class _PageActivitiesState extends State<PageActivities> {
                       /* this works also:
     Navigator.popUntil(context, ModalRoute.withName('/'));
   */
-                      PageActivities(0);
+                      PageSearch(0);
                     }),
                 IconButton(
                     icon: Icon(Icons.search),
