@@ -91,7 +91,7 @@ class _PageActivitiesState extends State<PageActivities> {
 
   String tags_text(Activity act) {
     if (act.tags.length == 0) {
-      return "Aun no has añadido ningún tag!";
+      return "NO TAGS";
     }
     String result = "";
     act.tags.forEach((element) {
@@ -137,7 +137,9 @@ class _PageActivitiesState extends State<PageActivities> {
                     }),
                 IconButton(
                     icon: Icon(Icons.search),
-                    onPressed: () {} // TODO search by tag
+                    onPressed: () {
+
+                    } // TODO search by tag
                     ),
                 //TODO other actions
               ],
@@ -192,6 +194,7 @@ class _PageActivitiesState extends State<PageActivities> {
             ),
             TextSpan(
               text: '\n Tags : ${tags_text(activity)} ',
+              style: TextStyle(color: Colors.grey),
             ),
           ]),
         ),
@@ -216,6 +219,7 @@ class _PageActivitiesState extends State<PageActivities> {
             ),
             TextSpan(
               text: '\n Tags : ${tags_text(activity)} ',
+              style: TextStyle(color: Colors.grey),
             ),
           ]),
         ),
